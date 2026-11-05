@@ -26,7 +26,7 @@ export function Bubble({ m, me, peerName, reply, grouped, onLongPress, onImage }
   const time = fmtTime(m.ts);
 
   const meta = (
-    <View style={[s.meta, m.image && !m.text && s.metaOnImage]}>
+    <View style={[s.meta, m.text ? s.metaInline : s.metaOnImage]}>
       {m.edited && <Text style={s.metaText}>edited</Text>}
       <Text style={s.metaText}>{time}</Text>
       {mine && (
@@ -39,14 +39,12 @@ export function Bubble({ m, me, peerName, reply, grouped, onLongPress, onImage }
     </View>
   );
 
-  // Invisible copy of the timestamp at the end of the text, so the real (absolutely positioned) one
-  // sits on the last line without covering words.
+  // Time sits after the text when it fits, and wraps to its own right-aligned line when it doesn't.
+  // (An invisible spacer copy of the time used to reserve room, but Android ignores transparent
+  // nested text, so both copies showed up overlapping.)
   const textBlock = !!m.text && (
-    <View>
-      <Text style={s.text}>
-        {m.text}
-        <Text style={s.spacer}>{`   ${m.edited ? 'edited ' : ''}${time}${mine ? '     ' : ''}`}</Text>
-      </Text>
+    <View style={s.textRow}>
+      <Text style={s.text}>{m.text}</Text>
       {meta}
     </View>
   );
@@ -88,10 +86,11 @@ const s = StyleSheet.create({
   out: { backgroundColor: C.out, borderBottomRightRadius: 6 },
   in: { backgroundColor: C.in, borderBottomLeftRadius: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   imageBubble: { padding: 4 },
-  text: { fontFamily: F.medium, fontSize: 16, lineHeight: 22, color: C.text },
-  spacer: { fontSize: 11, color: 'transparent' },
-  meta: { position: 'absolute', right: 0, bottom: 1, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metaOnImage: { right: 8, bottom: 8, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.5)' },
+  textRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'flex-end' },
+  text: { flexShrink: 1, fontFamily: F.medium, fontSize: 16, lineHeight: 22, color: C.text },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaInline: { marginLeft: 10, marginBottom: 2, flexGrow: 1, justifyContent: 'flex-end' },
+  metaOnImage: { position: 'absolute', right: 8, bottom: 8, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.5)' },
   metaText: { fontFamily: F.medium, fontSize: 11, color: C.muted },
   caption: { paddingHorizontal: 10, paddingTop: 6, paddingBottom: 4 },
 

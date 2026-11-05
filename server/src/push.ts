@@ -10,7 +10,14 @@ export const NUDGES: [title: string, body: string][] = [
 
 const NUDGE_EVERY = 3 * 60 * 1000; // at most one nudge per person per 3 minutes
 
-export type PushMessage = { to: string; title: string; body: string; sound: 'default' };
+export type PushMessage = {
+  to: string;
+  title: string;
+  body: string;
+  sound: 'default';
+  channelId: 'default'; // the app's "Game updates" channel
+  priority: 'high'; // delivered promptly even when the phone is idle
+};
 export type PushSender = (url: string, msg: PushMessage) => Promise<unknown>;
 export type Nudger = ReturnType<typeof createNudger>;
 
@@ -27,7 +34,7 @@ export function createNudger({ pushUrl, every = NUDGE_EVERY, send = postJson }: 
       if (!token || Date.now() - (last.get(userId) ?? 0) < every) return;
       last.set(userId, Date.now());
       const [title, body] = NUDGES[Math.floor(Math.random() * NUDGES.length)];
-      send(pushUrl, { to: token, title, body, sound: 'default' }).catch((err: Error) => console.warn('push failed:', err.message));
+      send(pushUrl, { to: token, title, body, sound: 'default', channelId: 'default', priority: 'high' }).catch((err: Error) => console.warn('push failed:', err.message));
     },
 
     /** They just left the chat: the next message should nudge right away. */
