@@ -20,6 +20,15 @@ export function attachRelay(httpServer: Server, { key, store, nudger }: Deps) {
     return targets.length > 0;
   };
   const tell = (ws: WebSocket, msg: ServerMessage) => ws.send(JSON.stringify(msg));
+  /**
+   * Refuses a connection. Render's proxy drops WebSocket close frames (the client only sees a 1006 ~20s later),
+   * so the reason also goes as a normal message, and the socket is cut shortly after.
+   */
+  const reject = (ws: WebSocket, code: number, reason: string) => {
+    tell(ws, { type: 'rejected', code, reason });
+    ws.close(code, reason);
+    setTimeout(() => ws.terminate(), 1000).unref();
+  };
   const broadcast = (msg: ServerMessage) => {
     const raw = JSON.stringify(msg);
     for (const ws of owner.keys()) if (ws.readyState === WebSocket.OPEN) ws.send(raw);
@@ -92,17 +101,15 @@ export function attachRelay(httpServer: Server, { key, store, nudger }: Deps) {
 
   wss.on('connection', (ws, req) => {
     const hello = parseHandshake(req.url ?? '', key);
-    if ('close' in hello) return ws.close(...hello.close);
+    if ('close' in hello) return reject(ws, ...hello.close);
     const { id, name } = hello;
 
     // Messages can arrive while we're still registering, so every message waits on this chain.
     let chain: Promise<unknown> = (async () => {
-      if ((await store.registerUser(id, name)) === 'taken') {
-        ws.close(CLOSE.NAME_TAKEN, 'username taken');
-        return;
-      }
+      if ((await store.registerUser(id, name)) === 'taken') return reject(ws, CLOSE.NAME_TAKEN, 'username taken');
       owner.set(ws, id);
       knownUsers.add(id);
+      tell(ws, { type: 'ready' });
       broadcast({ type: 'presence', id, online: true });
       const [mail] = await Promise.all([store.mailboxPeek(id), sendFriends(id)]);
       for (const item of mail) ws.send(item.payload);

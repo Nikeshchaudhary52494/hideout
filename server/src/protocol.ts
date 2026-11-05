@@ -24,9 +24,11 @@ export type ClientMessage =
 
 /** Messages the server sends that aren't relayed events. */
 export type ServerMessage =
+  | { type: 'ready' } // signed in: only now may the client send (an open socket alone can still be rejected)
   | { type: 'friends'; friends: { id: string; username: string; online: boolean }[] }
   | { type: 'presence'; id: string; online: boolean }
-  | { type: 'notice'; text: string };
+  | { type: 'notice'; text: string }
+  | { type: 'rejected'; code: number; reason: string }; // sent before closing: some proxies drop close frames
 
 /** Checks the connection URL. */
 export function parseHandshake(url: string, key: string): Handshake {

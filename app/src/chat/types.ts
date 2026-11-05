@@ -36,9 +36,11 @@ export type Friend = { id: string; username: string; online: boolean };
 
 /** Anything the server can send us, after validation. */
 export type Incoming =
+  | { type: 'ready' } // signed in; only now is it safe to send the outbox
   | { type: 'friends'; friends: Friend[] } // my full friends list (on connect and whenever it changes)
   | { type: 'presence'; id: string; online: boolean }
   | { type: 'notice'; text: string } // e.g. "No one is called …"
+  | { type: 'rejected'; code: number } // sign-in refused; also sent as a message because proxies can drop close codes
   | { type: 'typing'; from: string }
   | (Omit<Stamped<MsgEvent>, 'image'> & { image?: WireImg })
   | Stamped<Exclude<ChatEvent, MsgEvent>>;

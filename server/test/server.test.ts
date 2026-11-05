@@ -25,16 +25,27 @@ const open = (u: string) => new Promise<Client>((r) => {
 });
 const wait = (ms = 150) => new Promise((r) => setTimeout(r, ms));
 const of = (ws: Client, type: string) => ws.inbox.filter((e) => e.type === type);
-const chat = (ws: Client) => ws.inbox.filter((e) => !['friends', 'presence', 'notice'].includes(e.type));
+const chat = (ws: Client) => ws.inbox.filter((e) => !['ready', 'friends', 'presence', 'notice'].includes(e.type));
 const lastFriends = (ws: Client) => (of(ws, 'friends').pop()?.friends ?? []) as { id: string; username: string; online: boolean }[];
 const send = (ws: WebSocket, e: object) => ws.send(JSON.stringify(e));
 
+// The rejection also arrives as a normal message, because some proxies drop close frames.
+const rejection = (u: string) => new Promise<number>((r) => {
+  new WebSocket(u).on('message', (d) => {
+    const m = JSON.parse(d.toString());
+    if (m.type === 'rejected') r(m.code);
+  });
+});
+
 test('auth: wrong key, bad name, taken name', async () => {
   assert.equal(await closeCode(url('alice-1', 'alice', 'nope')), 4001);
+  assert.equal(await rejection(url('alice-1', 'alice', 'nope')), 4001, 'reason also sent as a message');
   assert.equal(await closeCode(url('alice-1', 'x')), 4003);
   const a = await open(url('alice-1', 'alice'));
   await wait();
+  assert.equal(a.inbox[0]?.type, 'ready', 'signed-in clients are told so first');
   assert.equal(await closeCode(url('mallory-1', 'ALICE')), 4002, 'case-insensitive');
+  assert.equal(await rejection(url('mallory-1', 'ALICE')), 4002);
   a.close();
   await wait();
 });

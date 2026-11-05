@@ -59,4 +59,7 @@ test('parseIncoming rejects junk and normalizes fields', () => {
   assert.deepEqual(parseIncoming('{"type":"presence","id":"a","online":0}'), { type: 'presence', id: 'a', online: false });
   assert.equal(parseIncoming('{"type":"presence"}'), null);
   assert.deepEqual(parseIncoming('{"type":"notice","text":"hi"}'), { type: 'notice', text: 'hi' });
+  assert.deepEqual(parseIncoming('{"type":"ready"}'), { type: 'ready' });
+  assert.deepEqual(parseIncoming('{"type":"rejected","code":4002,"reason":"username taken"}'), { type: 'rejected', code: 4002 });
+  assert.equal(parseIncoming('{"type":"rejected","code":"x"}'), null);
 });

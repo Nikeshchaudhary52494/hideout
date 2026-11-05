@@ -31,6 +31,7 @@ export function useChat(newUsername: string | null) {
 
   const sock = useRef<WebSocket | null>(null);
   const pushToken = useRef<string | null>(null);
+  const rejection = useRef<number | null>(null); // close code the server announced before closing
   const flushing = useRef(false);
   const lastTypingSent = useRef(0);
   const typingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -114,6 +115,14 @@ export function useChat(newUsername: string | null) {
         case 'notice':
           setNotice(e.text);
           return;
+        case 'ready': // signed in: now it's safe to send (an open socket can still be rejected)
+          setConnected(true);
+          if (pushToken.current) sendNow({ type: 'push', token: pushToken.current });
+          flush();
+          return;
+        case 'rejected':
+          rejection.current = e.code; // read by onclose; the close code itself may be lost by proxies
+          return;
         case 'typing':
           setTypingFrom(e.from);
           clearTimeout(typingTimer.current);
@@ -153,17 +162,16 @@ export function useChat(newUsername: string | null) {
     const connect = () => {
       const ws = new WebSocket(`${SERVER}?key=${encodeURIComponent(KEY)}&id=${me}&name=${encodeURIComponent(username)}`);
       sock.current = ws;
-      ws.onopen = () => {
-        setConnected(true);
-        if (pushToken.current) ws.send(JSON.stringify({ type: 'push', token: pushToken.current }));
-        handlers.current.flush();
-      };
+      // nothing is sent on open: we wait for the server's 'ready' (see receive)
       ws.onmessage = (ev) => handlers.current.receive(String(ev.data));
       ws.onclose = (ev) => {
+        const code = rejection.current ?? ev.code;
+        rejection.current = null;
         setConnected(false);
         setOnline({});
-        if (ev.code === 4002) return setError(`“${username}” is taken. Tap your name to pick another.`);
-        if (ev.code === 4001) return setError('Server rejected the app key.');
+        if (code === 4002) return setError(`“${username}” is taken. Tap your name to pick another.`);
+        if (code === 4003) return setError('That username isn’t allowed. Tap your name to pick another.');
+        if (code === 4001) return setError('This app version can’t reach the server (wrong app key).');
         if (alive) retry = setTimeout(connect, RETRY_MS);
       };
     };

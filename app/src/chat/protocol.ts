@@ -41,6 +41,7 @@ export function parseIncoming(raw: string): Incoming | null {
   }
   if (!e || typeof e !== 'object') return null;
 
+  if (e.type === 'ready') return { type: 'ready' };
   if (e.type === 'friends') {
     if (!Array.isArray(e.friends)) return null;
     const friends: Friend[] = e.friends
@@ -50,6 +51,7 @@ export function parseIncoming(raw: string): Incoming | null {
   }
   if (e.type === 'presence') return str(e.id) ? { type: 'presence', id: e.id, online: !!e.online } : null;
   if (e.type === 'notice') return str(e.text) ? { type: 'notice', text: e.text } : null;
+  if (e.type === 'rejected') return Number.isInteger(e.code) ? { type: 'rejected', code: e.code } : null;
   if (!str(e.from)) return null;
   if (e.type === 'typing') return { type: 'typing', from: e.from };
   if (!str(e.id)) return null;
