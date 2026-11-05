@@ -39,6 +39,12 @@
         }
       ]
     ],
-    "backgroundColor": "#07070B"
+    "backgroundColor": "#07070B",
+    "extra": {
+      "eas": {
+        "projectId": "94531454-c8c5-42d1-bc1e-b0af0d6426f1"
+      }
+    },
+    "owner": "nikesh003"
   }
 }
