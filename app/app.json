@@ -7,13 +7,16 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snakegame2.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#07070B"
-      }
+      },
+      "package": "com.snakegame2.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"

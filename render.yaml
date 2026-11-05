@@ -1,0 +1,19 @@
+# Render Blueprint: New → Blueprint → pick this repo. Fill in the three secrets when asked.
+services:
+  - type: web
+    name: hideout-server
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22.12.0"
+      - key: DB_CONNECTION_STRING # Supabase "Session pooler" string (IPv4), with [YOUR-PASSWORD] left in
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: CHAT_KEY # same value as EXPO_PUBLIC_CHAT_KEY in the app build
+        sync: false
