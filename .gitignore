@@ -3,3 +3,5 @@ node_modules/
 .env.*
 !.env.example
 .DS_Store
+# Firebase service-account private keys: never commit
+*-firebase-adminsdk-*.json
