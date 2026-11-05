@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { C, F } from '../../theme';
+import { haptic } from '../../lib/haptics';
 import { LEVELS, TARGET, speed } from '../rules';
 import type { GameData } from '../progress';
 import { Header } from '../components/Header';
@@ -22,7 +23,7 @@ export function Levels({ data, back, pick, locked }: Props) {
           return (
             <Pressable
               key={lvl}
-              onPress={() => (open ? pick(lvl) : locked())}
+              onPress={() => (open ? (haptic.tap(), pick(lvl)) : locked())}
               style={({ pressed }) => [s.tile, current && s.current, !open && { opacity: 0.4 }, pressed && open && gs.pressed]}
             >
               <View style={s.top}>

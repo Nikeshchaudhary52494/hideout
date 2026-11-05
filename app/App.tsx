@@ -8,6 +8,7 @@ import Chat from './src/chat/Chat';
 import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { C } from './src/theme';
+import { DialogHost } from './src/ui/dialog';
 
 // Keep the launch screen (dark + app icon) up until fonts are ready, then fade into the game.
 SplashScreen.preventAutoHideAsync();
@@ -43,6 +44,7 @@ export default function App() {
         ) : (
           <Game onUnlock={(username?: string) => { setNewUsername(username || null); setUnlocked(true); }} />
         )}
+        <DialogHost />
       </SafeAreaView>
     </SafeAreaProvider>
   );

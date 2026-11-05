@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Alert, ScrollView, Switch, Text, View } from 'react-native';
+import { ScrollView, Switch, Text, View } from 'react-native';
+import { showDialog } from '../../ui/dialog';
 import { C } from '../../theme';
 import type { IconName } from '../../ui/buttons';
 import type { GameData, Patch, Settings as SettingsData } from '../progress';
@@ -23,7 +24,7 @@ export function Settings({ data, update, back, buzz, onUnlock }: Props) {
     update((d) => ({ settings: { ...d.settings, [k]: v } }));
     buzz();
   };
-  const reset = () => Alert.alert('Reset progress?', 'Levels and high scores will be cleared.', [
+  const reset = () => showDialog('Reset progress?', 'Levels and high scores will be cleared.', [
     { text: 'Cancel', style: 'cancel' },
     { text: 'Reset', style: 'destructive', onPress: () => update({ level: 1, unlocked: 1, cleared: [], scores: [] }) },
   ]);

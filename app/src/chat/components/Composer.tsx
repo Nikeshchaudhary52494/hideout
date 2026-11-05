@@ -1,8 +1,10 @@
 import { useState, type ComponentRef, type RefObject } from 'react';
-import { Alert, Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Keyboard, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { C, F } from '../../theme';
+import { haptic, withTap } from '../../lib/haptics';
+import { showDialog } from '../../ui/dialog';
 import { preview } from '../protocol';
 import { shrink } from '../storage';
 import type { Img, Msg } from '../types';
@@ -56,7 +58,7 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
   const pickImage = async (camera: boolean) => {
     try {
       if (camera && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
-        return Alert.alert('Camera access is off', 'Turn it on in Settings to take photos.');
+        return showDialog('Camera access is off', 'Turn it on in Settings to take photos.');
       }
       const launch = camera ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
       const r = await launch({ mediaTypes: ['images'], quality: 1 });
@@ -64,11 +66,12 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
       setDraft(await shrink(r.assets[0]));
       setEmojiOpen(false);
     } catch (err) {
-      Alert.alert('Could not load photo', String((err as Error)?.message ?? err));
+      showDialog('Could not load photo', String((err as Error)?.message ?? err));
     }
   };
 
   const toggleEmoji = () => {
+    haptic.tap();
     if (emojiOpen) {
       setEmojiOpen(false);
       inputRef.current?.focus();
@@ -90,7 +93,7 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
             <Text style={s.bannerTitle}>{editing ? 'Edit message' : `Reply to ${banner.from === me ? 'yourself' : peerName}`}</Text>
             <Text style={s.bannerText} numberOfLines={1}>{preview(banner)}</Text>
           </View>
-          <Pressable onPress={cancel} hitSlop={10}><Feather name="x" size={18} color={C.muted} /></Pressable>
+          <Pressable onPress={withTap(cancel)} hitSlop={10}><Feather name="x" size={18} color={C.muted} /></Pressable>
         </View>
       )}
 
@@ -98,13 +101,13 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
         <View style={s.banner}>
           <Image source={{ uri: draft.uri }} style={s.draftImg} />
           <Text style={[s.bannerText, { flex: 1 }]}>Add a caption, or just send</Text>
-          <Pressable onPress={() => setDraft(null)} hitSlop={10}><Feather name="x" size={18} color={C.muted} /></Pressable>
+          <Pressable onPress={withTap(() => setDraft(null))} hitSlop={10}><Feather name="x" size={18} color={C.muted} /></Pressable>
         </View>
       )}
 
       <View style={s.bar}>
         {!editing && (
-          <Pressable onPress={() => pickImage(false)} hitSlop={8}>
+          <Pressable onPress={withTap(() => pickImage(false))} hitSlop={8}>
             <Feather name="paperclip" size={20} color={C.muted} />
           </Pressable>
         )}
@@ -123,11 +126,11 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
           <Feather name={emojiOpen ? 'type' : 'smile'} size={20} color={emojiOpen ? C.accent : C.muted} />
         </Pressable>
         {canSend ? (
-          <Pressable onPress={send} style={s.send}>
+          <Pressable onPress={withTap(send)} style={s.send}>
             <Feather name={editing ? 'check' : 'arrow-up'} size={20} color={C.accentInk} />
           </Pressable>
         ) : (
-          <Pressable onPress={() => pickImage(true)} hitSlop={8} style={s.camera}>
+          <Pressable onPress={withTap(() => pickImage(true))} hitSlop={8} style={s.camera}>
             <Feather name="camera" size={20} color={C.muted} />
           </Pressable>
         )}

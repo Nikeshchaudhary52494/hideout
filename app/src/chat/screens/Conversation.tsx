@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
-import { Alert, BackHandler, FlatList, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { BackHandler, FlatList, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import * as Haptics from 'expo-haptics';
+import { haptic } from '../../lib/haptics';
+import { showDialog } from '../../ui/dialog';
 import { RoundBtn } from '../../ui/buttons';
 import { C, F } from '../../theme';
 import { dayKey, dayLabel } from '../format';
@@ -48,7 +49,7 @@ export function Conversation({ chat, onLock }: { chat: ChatApi; onLock: () => vo
     setEditing(null);
   };
 
-  const confirmDelete = (m: Msg) => Alert.alert('Delete message?', undefined, [
+  const confirmDelete = (m: Msg) => showDialog('Delete message?', undefined, [
     { text: 'Cancel', style: 'cancel' },
     { text: 'Delete for me', style: 'destructive', onPress: () => chat.removeMessage(m, false) },
     ...(m.from === me ? [{ text: 'Delete for everyone', style: 'destructive' as const, onPress: () => chat.removeMessage(m, true) }] : []),
@@ -64,7 +65,7 @@ export function Conversation({ chat, onLock }: { chat: ChatApi; onLock: () => vo
   ] : [];
 
   const openMenu = (m: Msg) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    haptic.medium();
     Keyboard.dismiss();
     setSelected(m);
   };

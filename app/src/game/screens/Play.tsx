@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View, type GestureResponderEvent, type Lay
 import { Feather } from '@expo/vector-icons';
 import { RoundBtn, type IconName } from '../../ui/buttons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 import {
   ARENAS, N, TARGET, buildArena, canTurn, fresh, scoreFor, speed, step, tickMs,
   type Arena, type ArenaKey, type Cell, type GameState,
@@ -194,7 +195,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function DPad({ turn }: { turn: (d: Cell) => void }) {
   const btn = (icon: IconName, d: Cell) => (
-    <Pressable onPressIn={() => turn(d)} style={({ pressed }) => [s.dBtn, pressed && { backgroundColor: C.accent }]}>
+    <Pressable onPressIn={withTap(() => turn(d))} style={({ pressed }) => [s.dBtn, pressed && { backgroundColor: C.accent }]}>
       {({ pressed }) => <Feather name={icon} size={26} color={pressed ? C.accentInk : C.text} />}
     </Pressable>
   );

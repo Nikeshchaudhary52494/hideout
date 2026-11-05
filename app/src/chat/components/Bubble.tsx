@@ -1,6 +1,7 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 import { fmtTime } from '../format';
 import { preview } from '../protocol';
 import type { Msg } from '../types';
@@ -64,7 +65,7 @@ export function Bubble({ m, me, peerName, reply, grouped, onLongPress, onImage }
           </View>
         )}
         {m.image && (
-          <Pressable onPress={onImage} onLongPress={onLongPress} delayLongPress={LONG_PRESS_MS} disabled={!onImage}>
+          <Pressable onPress={onImage && withTap(onImage)} onLongPress={onLongPress} delayLongPress={LONG_PRESS_MS} disabled={!onImage}>
             <Image source={{ uri: m.image.uri }} style={{ width: IMG_W, height: imgH, borderRadius: 16 }} />
             {!m.text && meta}
           </Pressable>

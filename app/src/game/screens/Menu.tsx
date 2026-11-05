@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } fr
 import { Feather } from '@expo/vector-icons';
 import { RoundBtn } from '../../ui/buttons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 import { ARENAS, DEMO, LEVELS, N, autopilot, fresh, speed, step } from '../rules';
 import type { GameData } from '../progress';
 import { Food, Mark, Snake } from '../components/Board';
@@ -25,7 +26,7 @@ export function Menu({ data, best, go }: Props) {
         <RoundBtn icon="settings" onPress={() => go('settings')} />
       </View>
 
-      <Pressable onPress={() => go('play')} style={s.hero}>
+      <Pressable onPress={withTap(() => go('play'))} style={s.hero}>
         <Demo size={Math.min(width - 64, 340)} />
         <View style={s.heroFoot}>
           <View style={{ flex: 1 }}>

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { showDialog } from '../../ui/dialog';
+import { haptic, withTap } from '../../lib/haptics';
 import { Feather } from '@expo/vector-icons';
 import { NAME_RULE } from '../../config';
 import { RoundBtn } from '../../ui/buttons';
@@ -42,7 +44,7 @@ export function People({ chat, onLock }: { chat: ChatApi; onLock: () => void }) 
     chat.addFriend(typed);
     setQuery('');
   };
-  const confirmRemove = (r: PersonRow) => Alert.alert(`Remove ${r.name}?`, 'Your messages stay on this phone.', [
+  const confirmRemove = (r: PersonRow) => showDialog(`Remove ${r.name}?`, 'Your messages stay on this phone.', [
     { text: 'Cancel', style: 'cancel' },
     { text: 'Remove', style: 'destructive', onPress: () => chat.removeFriend(r.id) },
   ]);
@@ -51,7 +53,7 @@ export function People({ chat, onLock }: { chat: ChatApi; onLock: () => void }) 
     const n = nameDraft?.trim();
     if (n && n !== username) {
       if (NAME_RULE.test(n)) chat.rename(n);
-      else Alert.alert('Invalid username', 'Use 2–20 letters, numbers, spaces, _ . or -');
+      else showDialog('Invalid username', 'Use 2–20 letters, numbers, spaces, _ . or -');
     }
     setNameDraft(null);
   };
@@ -81,7 +83,7 @@ export function People({ chat, onLock }: { chat: ChatApi; onLock: () => void }) 
               selectionColor={C.accent}
             />
           ) : (
-            <Text style={cs.name} numberOfLines={1} onPress={() => setNameDraft(username ?? '')}>{username ?? 'Tap to set a username'}</Text>
+            <Text style={cs.name} numberOfLines={1} onPress={withTap(() => setNameDraft(username ?? ''))}>{username ?? 'Tap to set a username'}</Text>
           )}
         </View>
         <RoundBtn icon="x" onPress={onLock} />
@@ -106,7 +108,7 @@ export function People({ chat, onLock }: { chat: ChatApi; onLock: () => void }) 
       </View>
 
       {canAdd && (
-        <Pressable onPress={add} style={({ pressed }) => [s.addRow, pressed && { opacity: 0.8 }]}>
+        <Pressable onPress={withTap(add)} style={({ pressed }) => [s.addRow, pressed && { opacity: 0.8 }]}>
           <View style={s.addIcon}><Feather name="user-plus" size={18} color={C.accentInk} /></View>
           <Text style={s.addText}>Add “{typed}” as a friend</Text>
         </Pressable>
@@ -138,8 +140,8 @@ export function People({ chat, onLock }: { chat: ChatApi; onLock: () => void }) 
         )}
         renderItem={({ item: r }) => (
           <Pressable
-            onPress={() => chat.openPeer(r.id)}
-            onLongPress={() => confirmRemove(r)}
+            onPress={withTap(() => chat.openPeer(r.id))}
+            onLongPress={() => { haptic.medium(); confirmRemove(r); }}
             style={({ pressed }) => [s.person, pressed && { backgroundColor: C.card }]}
           >
             <Avatar name={r.name} size={52} online={r.online} />

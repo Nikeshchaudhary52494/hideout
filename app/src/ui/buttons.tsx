@@ -1,28 +1,29 @@
 import type { ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { withTap } from '../lib/haptics';
 import { C, F } from '../theme';
 
 export type IconName = ComponentProps<typeof Feather>['name'];
 
 type BtnProps = { label: string; icon?: IconName; onPress: () => void; kind?: 'primary' | 'secondary'; style?: StyleProp<ViewStyle> };
 
-/** Pill button: lavender primary, dark secondary. */
+/** Pill button: lavender primary, dark secondary. Ticks on press. */
 export function Btn({ label, icon, onPress, kind = 'primary', style }: BtnProps) {
   const primary = kind === 'primary';
   const color = primary ? C.accentInk : C.text;
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [s.btn, primary ? s.primary : s.secondary, pressed && s.pressed, style]}>
+    <Pressable onPress={withTap(onPress)} style={({ pressed }) => [s.btn, primary ? s.primary : s.secondary, pressed && s.pressed, style]}>
       {icon && <Feather name={icon} size={18} color={color} />}
       <Text style={[s.text, { color }]}>{label}</Text>
     </Pressable>
   );
 }
 
-/** 40pt round icon button used in headers. */
+/** 40pt round icon button used in headers. Ticks on press. */
 export function RoundBtn({ icon, onPress, size = 20 }: { icon: IconName; onPress: () => void; size?: number }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [s.round, pressed && s.pressed]} hitSlop={8}>
+    <Pressable onPress={withTap(onPress)} style={({ pressed }) => [s.round, pressed && s.pressed]} hitSlop={8}>
       <Feather name={icon} size={size} color={C.text} />
     </Pressable>
   );

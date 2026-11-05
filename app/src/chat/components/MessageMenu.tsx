@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { IconName } from '../../ui/buttons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 import type { Msg } from '../types';
 import { Bubble } from './Bubble';
 import { EmojiGrid, QUICK_REACTIONS } from './EmojiGrid';
@@ -37,11 +38,11 @@ export function MessageMenu({ message, me, peerName, reply, actions, onReact, on
             ) : (
               <View style={s.reactBar}>
                 {QUICK_REACTIONS.map((e) => (
-                  <Pressable key={e} onPress={() => react(message, e)} style={[s.reactBtn, message.reactions?.[me] === e && s.reactOn]}>
+                  <Pressable key={e} onPress={withTap(() => react(message, e))} style={[s.reactBtn, message.reactions?.[me] === e && s.reactOn]}>
                     <Text style={s.reactEmoji}>{e}</Text>
                   </Pressable>
                 ))}
-                <Pressable onPress={() => setAllEmoji(true)} style={[s.reactBtn, s.reactOn]}>
+                <Pressable onPress={withTap(() => setAllEmoji(true))} style={[s.reactBtn, s.reactOn]}>
                   <Feather name="plus" size={18} color={C.text} />
                 </Pressable>
               </View>
@@ -52,7 +53,7 @@ export function MessageMenu({ message, me, peerName, reply, actions, onReact, on
                 {actions.map((a, i) => (
                   <Pressable
                     key={a.label}
-                    onPress={() => { close(); a.run(message); }}
+                    onPress={withTap(() => { close(); a.run(message); })}
                     style={({ pressed }) => [s.item, i > 0 && s.divider, pressed && { backgroundColor: C.raised }]}
                   >
                     <Text style={[s.itemText, a.danger && { color: C.red }]}>{a.label}</Text>

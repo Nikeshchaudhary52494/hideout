@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import type { IconName } from '../../ui/buttons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 
 type Props = {
   icon: IconName;
@@ -18,7 +19,7 @@ type Props = {
 /** List row inside a card: round icon, label, optional value, chevron. */
 export function Row({ icon, label, sub, value, color = C.text, onPress, right, children }: Props) {
   return (
-    <Pressable onPress={onPress} disabled={!onPress} style={({ pressed }) => [s.row, pressed && s.pressed]}>
+    <Pressable onPress={onPress && withTap(onPress)} disabled={!onPress} style={({ pressed }) => [s.row, pressed && s.pressed]}>
       <View style={s.icon}><Feather name={icon} size={18} color={color} /></View>
       <View style={{ flex: 1 }}>
         <Text style={[s.label, { color }]}>{label}</Text>

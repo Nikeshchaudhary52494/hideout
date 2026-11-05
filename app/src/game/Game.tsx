@@ -1,10 +1,11 @@
 // The game shell: owns saved progress and switches between screens.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { C } from '../theme';
+import { setHapticsEnabled } from '../lib/haptics';
 import { LEVELS } from './rules';
 import { loadGame, recordRun, saveGame, type GameData, type Patch } from './progress';
-import { makeBuzz } from './useBuzz';
+import { buzz } from './useBuzz';
 import { Fade } from './components/Fade';
 import { Menu } from './screens/Menu';
 import { Levels } from './screens/Levels';
@@ -23,8 +24,9 @@ export default function Game({ onUnlock }: { onUnlock: (username?: string) => vo
     saveGame(next);
     return next;
   });
-  const buzz = makeBuzz(data.settings.haptics);
-  const go = (s: Screen) => { buzz(); setScreen(s); };
+  // the Vibration setting switches haptics off everywhere, chat included
+  useEffect(() => setHapticsEnabled(data.settings.haptics), [data.settings.haptics]);
+  const go = (s: Screen) => setScreen(s); // the pressed button already ticked
   const menu = () => go('menu');
   const best = data.scores[0]?.score ?? 0;
 

@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { C, F } from '../../theme';
+import { withTap } from '../../lib/haptics';
 import { ARENAS, ARENA_KEYS, type ArenaKey } from '../rules';
 import type { GameData } from '../progress';
 import { ArenaPreview } from '../components/Board';
@@ -19,7 +20,7 @@ export function Arenas({ data, back, pick }: Props) {
         {ARENA_KEYS.map((key) => {
           const on = data.arena === key;
           return (
-            <Pressable key={key} onPress={() => pick(key)} style={({ pressed }) => [s.card, on && s.on, pressed && gs.pressed]}>
+            <Pressable key={key} onPress={withTap(() => pick(key))} style={({ pressed }) => [s.card, on && s.on, pressed && gs.pressed]}>
               <ArenaPreview arena={key} size={preview} />
               <View style={s.head}>
                 <Text style={s.name}>{ARENAS[key].name}</Text>

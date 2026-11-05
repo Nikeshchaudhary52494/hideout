@@ -1,11 +1,6 @@
-import * as Haptics from 'expo-haptics';
+import { haptic } from '../lib/haptics';
 
 export type Buzz = (kind?: 'light' | 'heavy' | 'success' | 'error') => void;
 
-/** Haptic feedback that respects the Vibration setting. */
-export const makeBuzz = (enabled: boolean): Buzz => (kind = 'light') => {
-  if (!enabled) return;
-  if (kind === 'success') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  else if (kind === 'error') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-  else Haptics.impactAsync(kind === 'heavy' ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Light);
-};
+/** Game-event vibration (eating, dying, clearing a level). Respects the Vibration setting via lib/haptics. */
+export const buzz: Buzz = (kind = 'light') => haptic[kind]();
