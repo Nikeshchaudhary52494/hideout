@@ -9,6 +9,7 @@ import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { C } from './src/theme';
 import { DialogHost } from './src/ui/dialog';
+import { isAwayOnPurpose } from './src/lib/appLock';
 
 // Keep the launch screen (dark + app icon) up until fonts are ready, then fade into the game.
 SplashScreen.preventAutoHideAsync();
@@ -24,9 +25,9 @@ export default function App() {
   const [unlocked, setUnlocked] = useState(false);
   const [newUsername, setNewUsername] = useState<string | null>(null); // set only right after first-time cheat code setup
 
-  // Leaving the app hides the chat again.
+  // Leaving the app hides the chat again (but not when we opened the photo picker / camera ourselves).
   useEffect(() => {
-    const sub = AppState.addEventListener('change', (s) => s !== 'active' && setUnlocked(false));
+    const sub = AppState.addEventListener('change', (s) => s !== 'active' && !isAwayOnPurpose() && setUnlocked(false));
     return () => sub.remove();
   }, []);
 

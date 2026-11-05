@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { isRunningInExpoGo } from 'expo';
+import { awayOnPurpose } from '../lib/appLock';
 
 /**
  * Expo push token, or null where push isn't possible (Expo Go on Android, permission denied, no EAS project).
@@ -15,7 +16,8 @@ export async function getPushToken(): Promise<string | null> {
       await Notifications.setNotificationChannelAsync('default', { name: 'Game updates', importance: Notifications.AndroidImportance.DEFAULT });
     }
     let { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') ({ status } = await Notifications.requestPermissionsAsync());
+    // the system prompt can background the app; it's ours, so it mustn't lock the chat
+    if (status !== 'granted') ({ status } = await awayOnPurpose(Notifications.requestPermissionsAsync));
     if (status !== 'granted') return null;
     return (await Notifications.getExpoPushTokenAsync()).data;
   } catch (err) {

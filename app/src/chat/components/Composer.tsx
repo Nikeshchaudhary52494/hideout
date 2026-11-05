@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { C, F } from '../../theme';
 import { haptic, withTap } from '../../lib/haptics';
+import { awayOnPurpose } from '../../lib/appLock';
 import { showDialog } from '../../ui/dialog';
 import { preview } from '../protocol';
 import { shrink } from '../storage';
@@ -57,11 +58,12 @@ export function Composer({ me, peerName, replyTo, editing, inputRef, onCancel, o
 
   const pickImage = async (camera: boolean) => {
     try {
-      if (camera && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
+      // the permission prompt, picker and camera are other screens: don't let them lock the chat
+      if (camera && !(await awayOnPurpose(ImagePicker.requestCameraPermissionsAsync)).granted) {
         return showDialog('Camera access is off', 'Turn it on in Settings to take photos.');
       }
       const launch = camera ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
-      const r = await launch({ mediaTypes: ['images'], quality: 1 });
+      const r = await awayOnPurpose(() => launch({ mediaTypes: ['images'], quality: 1 }));
       if (r.canceled) return;
       setDraft(await shrink(r.assets[0]));
       setEmojiOpen(false);
